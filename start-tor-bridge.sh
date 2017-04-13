@@ -11,6 +11,14 @@
 # LAN1 routes all traffic through TOR; LAN2 does not.
 #
 
+echo == Clear existing iptables rules: =================
+sudo iptables -F
+sudo iptables -F -t nat
+sudo iptables -F -t mangle
+sudo iptables -X
+sudo iptables -X -t nat
+sudo iptables -X -t mangle
+
 echo == Internet interface: ============================
 sudo ifconfig eth0 up
 sudo dhclient eth0
@@ -30,12 +38,6 @@ sudo cp -f ./dhcpd.conf /etc/dhcp/dhcpd.conf
 sudo cp -f ./isc-dhcp-server /etc/default/isc-dhcp-server
 sudo sysctl net.ipv4.ip_forward=1
 sudo /bin/sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
-sudo iptables -F
-sudo iptables -F -t nat
-sudo iptables -F -t mangle
-sudo iptables -X
-sudo iptables -X -t nat
-sudo iptables -X -t mangle
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 sudo iptables -A FORWARD -i eth0 -o eth2 -m state --state RELATED,ESTABLISHED -j ACCEPT
 sudo iptables -A FORWARD -i eth2 -o eth0 -j ACCEPT
@@ -53,3 +55,5 @@ sudo iptables-save>/dev/null
 echo == Package update: ================================
 sudo apt-get -y update
 sudo apt-get -y upgrade
+git pull
+
