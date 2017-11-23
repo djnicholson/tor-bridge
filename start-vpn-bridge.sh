@@ -9,6 +9,7 @@
 # 
 
 echo == Clear existing iptables rules: =================
+sudo apt-get -y --force-yes install iptables
 sudo iptables -F
 sudo iptables -F -t nat
 sudo iptables -F -t mangle
@@ -27,8 +28,8 @@ ifconfig wlan0
 
 echo == Internet connection sharing: ===================
 sudo apt-get -y --force-yes install isc-dhcp-server
-sudo cp -f ./dhcpd-vpn.conf /etc/dhcp/dhcpd.conf
 sudo cp -f ./isc-dhcp-server-vpn /etc/default/isc-dhcp-server
+sudo cp -f ./dhcpd-vpn.conf /etc/dhcp/dhcpd.conf
 sudo sysctl net.ipv4.ip_forward=1
 sudo /bin/sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
@@ -38,10 +39,14 @@ sudo service isc-dhcp-server start
 sudo update-rc.d isc-dhcp-server enable
 
 echo == OpenVPN: =======================================
-echo TODO
+sudo apt-get -y --force-yes install openvpn
+sudo cp -f ../vpn.conf /etc/openvpn/vpn.conf
+sudo cp -f ./openvpn /etc/default/openvpn
 
 echo == hostapd: =======================================
-echo TODO
+sudo nmcli connection add type wifi ifname wlan0 con-name vpn-bridge autoconnect yes ssid VPN-AP mode ap
+sudo nmcli connection modify vpn-bridge 802-11-wireless.mode ap 802-11-wireless-security.key-mgmt wpa-psk ipv4.method shared 802-11-wireless-security.psk 'VPN-BRIDGE-0001'
+sudo nmcli connection up vpn-bridge
 
 echo == Package update: ================================
 sudo apt-get -y update
